@@ -11,7 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Entrada> Entrada { get; set; }
 
-    public DbSet<Entrada> EntradaDetalle { get; set; }
+    public DbSet<EntradaDetalle> EntradaDetalle { get; set; }
 }
 
     

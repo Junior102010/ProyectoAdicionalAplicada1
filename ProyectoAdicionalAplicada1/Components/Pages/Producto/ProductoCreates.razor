@@ -1,0 +1,108 @@
+﻿@page "/ProductoCreates/{ProductoId:int}"
+
+
+@inject ProductoServices productoServices
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+<PageTitle>@crear Producto</PageTitle>
+
+<EditForm Model="producto" OnValidSubmit="Guardar">
+	<DataAnnotationsValidator/>
+
+	<div class="container">
+		<div class="card shadow-lg">
+			
+			<div class="card-header bg-dark text-center">
+				<h5 class="card-title text-white">@crear Producto</h5>
+			</div>
+
+			<div class="card-body">
+
+				<div class="row">
+					<div class="col-3">
+						<div class="mb-3">
+							<label class="form-label"><strong>Id</strong></label>
+							<InputNumber readonly class="form-control" @bind-Value="producto.ProductoId" />
+						</div>
+					</div>
+
+					<div class="col-7 mb-3">
+						<label class="form-label"><strong>Descripcion</strong></label>
+						<InputText class="form-control" @bind-Value="producto.Descripcion" />
+						<ValidationMessage For="@(() => producto.Descripcion)" />
+					</div>
+					
+					<div class="col-3">
+						<div class="mb-3">
+							<label class="form-label"><strong>Costo</strong></label>
+							<InputNumber class="form-control" @bind-Value="producto.Costo" />
+							<ValidationMessage For="@(() => producto.Costo)" />
+						</div>
+					</div>
+
+					<div class="col-4">
+						<div class="mb-3">
+							<label class="form-label"><strong>Precio</strong></label>
+							<InputNumber class="form-control" @bind-Value="producto.Precio" />
+							<ValidationMessage For="@(() => producto.Precio)" />
+						</div>
+					</div>
+
+					<div class="col-4">
+						<div class="mb-3">
+							<label class="form-label"><strong>Existencias</strong></label>
+							<InputNumber class="form-control" @bind-Value="producto.Existencia" readonly />
+							<ValidationMessage For="@(() => producto.Existencia)" />
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="card-footer text-center bg-dark">
+				<div class="btn-group">
+					<a href="/ProductoIndex" class="btn btn-outline-secondary"><span class="bi bi-arrow-bar-left"/> Volver</a>
+					<button type="submit" class="btn btn-outline-success "><span class="bi bi-check-circle" /> Guardar</button>
+					@if(crear == "Editar")
+					{
+						<button type="button" class="btn btn-outline-danger" @onclick="Eliminar"><span class="bi bi-trash" /> Eliminar</button>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</EditForm>
+
+@code {
+	[Parameter]
+	public int ProductoId { get; set; }
+	public string crear { get; set; }
+	public Producto producto { get; set; } = new Producto();
+	public bool Eliminado { get; set; } = false;
+
+	protected override async Task OnInitializedAsync()
+	{
+		crear = ProductoId == 0 ? "Crear" : "Editar";
+		if (ProductoId > 0)
+		{
+			producto = await productoServices.Buscar(ProductoId);
+		}
+		
+	}
+
+	public async Task Guardar()
+	{
+		var ok = await productoServices.Guardar(producto);
+		if (ok)
+			navigationManager.NavigateTo("/ProductoIndex");
+	} 
+
+	public async Task Eliminar()
+	{
+		Eliminado = await productoServices.Eliminar(ProductoId);
+		if (Eliminado)
+			navigationManager.NavigateTo("/ProductoIndex");
+	}
+}

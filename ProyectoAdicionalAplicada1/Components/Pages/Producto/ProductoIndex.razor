@@ -1,0 +1,157 @@
+﻿@page "/ProductoIndex"
+@using ProyectoAdicionalAplicada1.Services
+@using ProyectoAdicionalAplicada1.Models
+@inject ProductoServices productoService
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>ProductoIndex</PageTitle>
+
+<div class="container">
+	<div class="card shadow-lg">
+		
+		<div class="card-header text-center bg-dark">
+			<h5 class="card-title text-white"><strong>Registro de Productos</strong></h5>
+		</div>
+		
+		<div class="card-body  border-5">
+			
+
+			<div class="row">
+				<div class="col-3">
+					<label class="form-label"><strong>Filtrar </strong></label>
+				</div>
+
+				<div class="col-4">
+					<label class="form-label"><strong>Buscar</strong></label>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-3">
+					<InputSelect class="form-select" @bind-Value="Filtro">
+						<option value="" selected disabled>Elija una opcion</option>
+						<option value="Nombre">Descripcion</option>
+						<option value="Precio">Precio</option>
+						<option value="Costo">Costo</option>
+					</InputSelect>
+				</div>
+
+				<div class="col-4">
+					<div class="input-group">
+							<input class="form-control" @bind-value="ValorFiltro" placeholder="Buscar" />
+							<button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+							<button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise" @onclick="Restablecer"></button>
+						
+					</div>
+					
+				</div>
+				<div class="col-4">
+					<div>
+						<a href="/ProductoCreates/0" class="btn btn-success bi bi-plus-square"> Crear</a>
+					</div>
+				</div>
+				
+			</div>
+
+				<table class="table table-hover mt-3">
+					<thead class="table table-striped text-black">
+						<tr>
+							<th>Id</th>
+							<th>Descripcion</th>
+							<th>Costo</th>
+							<th>Precio</th>
+							<th>Existencias</th>
+							<th>Editar</th>
+						</tr>
+					</thead>
+					<tbody>
+					@if (listaProductos == null || !listaProductos.Any())
+					{
+						<tr>
+							<td colspan="5" class="text-center py-5">
+								<i class="bi bi-box-seam display-1 text-secondary d-block mb-3"></i>
+								<h2 class="display-6 text-secondary">No hay productos registrados</h2>
+								<p class="text-muted">Utilice el botón de crear para agregar nuevos elementos.</p>
+							</td>
+						</tr>
+					}
+					else
+					{
+						@foreach (var P in listaProductos)
+						{
+							<tr>
+								<td>@P.ProductoId</td>
+								<td>@P.Descripcion</td>
+								<td>@P.Costo $</td>
+								<td>@P.Precio $</td>
+								<td>@P.Existencia</td>
+
+								<td>
+									<a href="/ProductoCreates/@P.ProductoId" class="btn btn-outline-primary bi bi-pencil"></a>
+								</td>
+
+								
+							</tr>
+						}
+					}
+					
+					</tbody>
+				</table>
+
+
+		</div>
+		<div class="card-footer d-flex justify-content-end text-center bg-dark">
+				<div class="d-flex flex-column text-end">
+				<label class="form-label text-white"><strong>Cantidad de Productos Registrados: </strong>@if(listaProductos != null){@listaProductos.Count()}</label>
+				</div>
+			</div>
+	</div>
+</div>
+
+@code {
+	public List<Producto> listaProductos { get; set; } = new List<Producto>();
+	public string Filtro { get; set; } = string.Empty;
+	public string ValorFiltro { get; set; } = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		listaProductos = await productoService.Listar(p => true);
+	}
+
+	public async Task Buscar()
+	{
+		var listaFiltrada = await productoService.Listar(e => e.ProductoId > 0);
+
+		if (!string.IsNullOrEmpty(Filtro))
+		{
+			if (Filtro == "Id" && int.TryParse(ValorFiltro, out int id))
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.ProductoId == id).ToList();
+			}
+			if(Filtro == "Nombre")
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.Descripcion.Contains(ValorFiltro)).ToList();
+			}
+			if(Filtro == "Precio" && double.TryParse(ValorFiltro, out double precio))
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.Precio == precio).ToList();
+			}
+			if (Filtro == "Costo" && double.TryParse(ValorFiltro, out double costo))
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.Costo == costo).ToList();
+			}
+			
+		}
+
+		listaProductos = listaFiltrada;
+
+	}
+
+	public async Task Restablecer()
+	{
+		listaProductos = await productoService.Listar(p => true);
+		Filtro = string.Empty;
+		ValorFiltro = string.Empty;
+	}
+}

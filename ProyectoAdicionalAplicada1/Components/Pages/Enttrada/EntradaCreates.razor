@@ -1,0 +1,204 @@
+﻿@page "/EntradaCreates/{EntradaId:int}"
+
+
+
+@inject ProductoServices productoServices
+@inject EntradasServices entradaServices
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<PageTitle>@crear Producto</PageTitle>
+
+<EditForm Model="entrada" OnValidSubmit="Guardar">
+	<DataAnnotationsValidator />
+
+	<div class="container">
+		<div class="card shadow-lg">
+
+			<div class="card-header bg-dark text-center">
+				<h5 class="card-title text-white">@crear Entrada</h5>
+			</div>
+
+			<div class="card-body">
+
+				<div class="row">
+					<div class="col-3">
+						<div class="mb-3">
+							<label class="form-label"><strong>Id</strong></label>
+							<InputNumber readonly class="form-control" @bind-Value="entrada.EntradaId" />
+						</div>
+					</div>
+
+					<div class="col-5 mb-3">
+						<label class="form-label "><strong>Concepto</strong></label>
+						<InputText class="form-control border-3 border-black" @bind-Value="entrada.Concepto" />
+						<ValidationMessage For="@(() => entrada.Concepto)" />
+					</div>
+					<label class="form-label "><strong>Fecha: @DateTime.Now.ToString("dd/mm/yy")</strong></label>
+
+
+					<div class="card-header text-center border-black">
+						<h3 >Productos de la Entrada</h3>
+					</div>
+					<div class="card border-4">
+						
+						<div class="row mt-3">
+
+							<div class="col-3">
+								
+								<label class="mt-1"><strong>Productos</strong></label>
+								<InputSelect class="form-select mt-1" @bind-Value="Detalle.ProductoId">
+									<option disabled value="0">Seleccione un Producto</option>
+									@foreach (var p in listaProducto)
+									{
+										<option value="@p.ProductoId">@p.Descripcion - @p.Existencia</option>
+									}
+								</InputSelect>
+								<ValidationMessage For="@(() => Detalle.ProductoId)" />
+								
+							</div>
+
+							<div class="col-3">
+								<label class="mt-1"><strong>Cantidad</strong></label>
+
+								<div class="input-group mt-1">
+
+									<InputNumber class="form-control" id="quantity-input" min="0" @bind-Value="Detalle.Cantidad" />
+									<button type="button" class="btn btn-outline-success" disabled="@(Detalle.Cantidad < 1)"  @onclick="AgregarDetalle"> Agregar <span class="bi bi-plus" /></button>
+									<ValidationMessage For="@(() => Detalle.Cantidad)" />
+								</div>
+							</div>
+
+						</div>
+
+
+						<table class="table table-bordered mt-3">
+							<thead class="table table-striped table-bordered">
+								<tr class="text-center">
+									<th>Id</th>
+									<th>Descripcion</th>
+									<th>Cantidad</th>
+									<th>Costo</th>
+									<th>Total</th>
+									<th>Eliminar</th>
+								</tr>
+							</thead>
+							@if (entrada.Detalles == null || !entrada.Detalles.Any())
+							{
+								<tr>
+									<td colspan="6" class="text-center py-5">
+										<i class="bi bi-box-seam display-1 text-secondary d-block mb-3"></i>
+										<h2 class="display-6 text-secondary">Agregue Productos</h2>
+										<p class="text-muted">Utilice el botón de crear para agregar nuevos elementos.</p>
+									</td>
+								</tr>
+							}
+							else
+							{
+								<tbody>
+									@foreach (var d in entrada.Detalles)
+									{
+										<tr class="text-center">
+											<td>@d.ProductoId</td>
+											<td>@listaProducto.FirstOrDefault(t => t.ProductoId == d.ProductoId)?.Descripcion</td>
+											<td>@d.Cantidad</td>
+											<td>RD$@Math.Round(d.Costo, 2)</td>
+											<td>RD$@Math.Round(d.Cantidad * d.Costo)</td>
+											<td>
+												<button type="button" class="btn btn-outline-danger" @onclick="() => EliminarDetalle(d)"><span class="bi bi-trash" /></button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							}
+						</table>
+
+					</div>
+
+					
+
+
+					
+				</div>
+
+			</div>
+			<div class="card-footer text-center bg-dark">
+				<div class="btn-group">
+					<a href="/EntradaIndex" class="btn btn-outline-secondary"><span class="bi bi-arrow-bar-left" /> Volver</a>
+					<button type="submit" class="btn btn-outline-success "><span class="bi bi-check-circle" /> Guardar</button>
+					@if (crear == "Editar")
+					{
+						<button type="button" class="btn btn-outline-danger" @onclick="Eliminar"><span class="bi bi-trash" /> Eliminar</button>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</EditForm>
+
+@code {
+	[Parameter]
+	public int EntradaId { get; set; }
+	public string crear { get; set; }
+	public Entrada entrada { get; set; } = new Entrada();
+	public bool Eliminado { get; set; } = false;
+	public EntradaDetalle Detalle { get; set; } = new EntradaDetalle();
+
+	public List<Producto> listaProducto { get; set; } = new List<Producto>();
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		Detalle = new EntradaDetalle { ProductoId = 0, Cantidad = 1 };
+		crear = EntradaId == 0 ? "Crear" : "Editar";
+		if (EntradaId > 0)
+		{
+
+			entrada = await entradaServices.Buscar(EntradaId);
+		}
+		Detalle.Cantidad = 1;
+		listaProducto = await productoServices.Listar(p => true);
+
+	}
+
+	public async Task Guardar()
+	{
+		entrada.Fecha = DateTime.Now;
+
+		var ok = await entradaServices.Guardar(entrada);
+		if (ok)
+			navigationManager.NavigateTo("/EntradaIndex");
+	}
+
+	private void AgregarDetalle()
+	{
+		var producto = listaProducto.FirstOrDefault(p => p.ProductoId == Detalle.ProductoId);
+		if(producto != null && Detalle.Cantidad > 0)
+		{
+			Detalle.Costo = producto.Costo;
+
+			entrada.Detalles.Add(Detalle);
+			entrada.Total = entrada.Detalles.Sum(d => d.Cantidad * d.Costo);
+			Detalle = new EntradaDetalle { ProductoId = 0 };
+			
+		}
+		
+	}
+
+
+	public async Task Eliminar()
+	{
+		Eliminado = await entradaServices.Eliminar(EntradaId);
+		if (Eliminado)
+			navigationManager.NavigateTo("/EntradaIndex");
+	}
+
+	public void EliminarDetalle(EntradaDetalle detalle)
+	{
+		entrada.Detalles.Remove(detalle);
+		entrada.Total = entrada.Detalles.Sum(d => d.Cantidad * d.Costo);
+		Detalle = detalle;
+	}
+
+}

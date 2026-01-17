@@ -1,0 +1,155 @@
+﻿@page "/EntradaIndex"
+@using ProyectoAdicionalAplicada1.Services
+@using ProyectoAdicionalAplicada1.Models
+@inject EntradasServices entradaService
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>EntradaIndex</PageTitle>
+
+<div class="container">
+	<div class="card shadow-lg">
+
+		<div class="card-header text-center bg-dark">
+			<h5 class="card-title text-white"><strong>Registro de Entradas</strong></h5>
+		</div>
+
+		<div class="card-body  border-5">
+
+
+			<div class="row">
+				<div class="col-3">
+					<label class="form-label"><strong>Filtrar </strong></label>
+				</div>
+
+				<div class="col-4">
+					<label class="form-label"><strong>Buscar</strong></label>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-3">
+					<InputSelect class="form-select" @bind-Value="Filtro">
+						<option value="" selected disabled>Elija una opcion</option>
+						<option value="Concepto">Concepto</option>
+						<option value="Total">Total</option>
+					</InputSelect>
+				</div>
+
+				<div class="col-4">
+					<div class="input-group">
+						<input class="form-control" @bind-value="ValorFiltro" placeholder="Buscar" />
+						<button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+						<button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise" @onclick="Restablecer"></button>
+
+					</div>
+
+				</div>
+				<div class="col-4">
+					<div>
+						<a href="/EntradaCreates/0" class="btn btn-success bi bi-plus-square"> Crear</a>
+					</div>
+				</div>
+
+			</div>
+
+			<table class="table table-hover mt-3">
+				<thead class="table table-striped text-black">
+					<tr>
+						<th>Id</th>
+						<th>Concepto</th>
+						<th>Total</th>
+						<th>Fecha</th>
+						<th>Editar</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (listaEntrada == null || !listaEntrada.Any())
+					{
+						<tr>
+							<td colspan="5" class="text-center py-5">
+								<i class="bi bi-truck display-1 text-secondary d-block mb-3"></i>
+								<h2 class="display-6 text-secondary">No hay Entradas registrados</h2>
+								<p class="text-muted">Utilice el botón de crear para agregar nuevos elementos.</p>
+							</td>
+						</tr>
+					}
+					else
+					{
+						@foreach (var P in listaEntrada)
+						{
+							<tr>
+								<td>@P.EntradaId</td>
+								<td>@P.Concepto</td>
+								<td>@P.Total $</td>
+								<td>@P.Fecha</td>
+
+								<td>
+									<a href="/EntradaCreates/@P.EntradaId" class="btn btn-outline-primary bi bi-pencil"></a>
+								</td>
+
+								
+							</tr>
+						}
+					}
+
+				</tbody>
+			</table>
+
+
+		</div>
+		<div class="card-footer d-flex justify-content-end text-center bg-dark">
+			<div class="d-flex flex-column text-end">
+				<label class="form-label text-white">
+					<strong>Cantidad de Entradas Registradas: </strong>@if(listaEntrada != null){
+					@listaEntrada.Count()
+								}
+</label>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	public List<Entrada> listaEntrada { get; set; } = new List<Entrada>();
+	public string Filtro { get; set; } = string.Empty;
+	public string ValorFiltro { get; set; } = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		listaEntrada = await entradaService.Listar(p => true);
+	}
+
+	public async Task Buscar()
+	{
+		var listaFiltrada = await entradaService.Listar(e => e.EntradaId > 0);
+
+		if (!string.IsNullOrEmpty(Filtro))
+		{
+			if (Filtro == "Id" && int.TryParse(ValorFiltro, out int id))
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.EntradaId == id).ToList();
+			}
+			if (Filtro == "Concepto")
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.Concepto.Contains(ValorFiltro)).ToList();
+			}
+			if (Filtro == "Total" && double.TryParse(ValorFiltro, out double total))
+			{
+				listaFiltrada = listaFiltrada.Where(e => e.Total == total).ToList();
+			}
+			
+
+		}
+
+		listaEntrada = listaFiltrada;
+
+	}
+
+	public async Task Restablecer()
+	{
+		listaEntrada = await entradaService.Listar(p => true);
+		Filtro = string.Empty;
+		ValorFiltro = string.Empty;
+	}
+}

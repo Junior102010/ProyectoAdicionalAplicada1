@@ -11,7 +11,9 @@ public class EntradaDetalle
     public int EntradaId { get; set; }
 
     [ForeignKey("ProductoId")]
-    public int ProductoId { get; set; }
+    [Required(ErrorMessage = "Campo Obligatorio")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un producto")]
+    public int? ProductoId { get; set; }
 
     [Required(ErrorMessage = "Campo Obligatorio")]
     [Range(0.01, double.MaxValue, ErrorMessage = "El Valor debe ser mayor a 0")]
