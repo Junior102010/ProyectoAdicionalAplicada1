@@ -17,7 +17,7 @@
 		<div class="card-body  border-5">
 			
 
-			<div class="row">
+			<div class="row mt-1">
 				<div class="col-3">
 					<label class="form-label"><strong>Filtrar </strong></label>
 				</div>
@@ -39,7 +39,7 @@
 
 				<div class="col-4">
 					<div class="input-group">
-						<input class="form-control border-3 border-black" @bind-value="ValorFiltro" placeholder="Buscar" />
+						<input class="form-control border-3 border-black" @bind-value="ValorFiltro" placeholder="Ingrese su Busqueda" />
 						<button type="button" class="btn btn-outline-primary bi bi-search border-3 border-primary" @onclick="Buscar"></button>
 						<button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise border-3 border-secondary" @onclick="Restablecer"></button>
 						
@@ -48,7 +48,7 @@
 				</div>
 				<div class="col-4">
 					<div>
-						<a href="/ProductoCreates/0" class="btn btn-success bi bi-plus-square border-3 border-success"> Crear</a>
+						<a href="/ProductoCreates/0" class="btn btn-primary bi bi-plus-square border-3 border-dark"> Crear</a>
 					</div>
 				</div>
 				
@@ -131,7 +131,7 @@
 			}
 			if(Filtro == "Nombre")
 			{
-				listaFiltrada = listaFiltrada.Where(e => e.Descripcion.Contains(ValorFiltro)).ToList();
+				listaFiltrada = listaFiltrada.Where(e => e.Descripcion.ToLower().Contains(ValorFiltro.ToLower())).ToList();
 			}
 			if(Filtro == "Precio" && double.TryParse(ValorFiltro, out double precio))
 			{
