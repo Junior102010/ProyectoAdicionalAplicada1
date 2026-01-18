@@ -32,12 +32,14 @@
 
 					<div class="col-5 mb-3">
 						<label class="form-label "><strong>Concepto</strong></label>
-						<InputText class="form-control border-3 border-black" @bind-Value="entrada.Concepto" />
+						<InputText class="form-control border-3 border-black" placeholder="Escriba un Concepto" @bind-Value="entrada.Concepto" />
 						<ValidationMessage For="@(() => entrada.Concepto)" />
 					</div>
-					<label class="form-label "><strong>Fecha: @DateTime.Now.ToString("dd/mm/yy")</strong></label>
-
-
+					<div class="col-3 mb-3">
+						<label class="form-label "><strong>Fecha</strong></label>
+						<InputDate class="form-control border-3 border-black" @bind-Value="entrada.Fecha" />
+						<ValidationMessage For="@(() => entrada.Fecha)" />
+					</div>
 					<div class="card-header text-center border-black">
 						<h3 >Productos de la Entrada</h3>
 					</div>
@@ -48,7 +50,7 @@
 							<div class="col-3">
 								
 								<label class="mt-1"><strong>Productos</strong></label>
-								<InputSelect class="form-select mt-1" @bind-Value="Detalle.ProductoId">
+								<InputSelect class="form-select mt-1 border-3 border-black" @bind-Value="Detalle.ProductoId">
 									<option disabled value="0">Seleccione un Producto</option>
 									@foreach (var p in listaProducto)
 									{
@@ -60,12 +62,12 @@
 							</div>
 
 							<div class="col-3">
-								<label class="mt-1"><strong>Cantidad</strong></label>
+								<label class="mt-1 "><strong>Cantidad</strong></label>
 
-								<div class="input-group mt-1">
+								<div class="input-group mt-1 ">
 
-									<InputNumber class="form-control" id="quantity-input" min="0" @bind-Value="Detalle.Cantidad" />
-									<button type="button" class="btn btn-outline-success" disabled="@(Detalle.Cantidad < 1)"  @onclick="AgregarDetalle"> Agregar <span class="bi bi-plus" /></button>
+									<InputNumber class="form-control border-3 border-black" id="quantity-input" min="0" @bind-Value="Detalle.Cantidad" />
+									<button type="button" class="btn btn-outline-success border-3 border-success" disabled="@(Detalle.Cantidad < 1)" @onclick="AgregarDetalle"> Agregar <span class="bi bi-plus" /></button>
 									<ValidationMessage For="@(() => Detalle.Cantidad)" />
 								</div>
 							</div>
@@ -141,7 +143,7 @@
 	[Parameter]
 	public int EntradaId { get; set; }
 	public string crear { get; set; }
-	public Entrada entrada { get; set; } = new Entrada();
+	public Entrada entrada { get; set; } = new Entrada{Fecha = DateTime.Now};
 	public bool Eliminado { get; set; } = false;
 	public EntradaDetalle Detalle { get; set; } = new EntradaDetalle();
 

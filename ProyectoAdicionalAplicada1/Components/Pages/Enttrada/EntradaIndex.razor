@@ -16,8 +16,24 @@
 
 		<div class="card-body  border-5">
 
-
 			<div class="row">
+				<div>
+					<label class="form-label col-2"><strong>Fecha Inicial</strong></label>
+					<label class="form-label"><strong>Fecha Final</strong></label>
+				</div>
+
+				<div class="col-2">
+					<InputDate class="form-control border-3 border-black" @bind-value="FechaInicio"></InputDate>
+				</div>
+
+				<div class="col-2">
+					<InputDate class="form-control border-3 border-black" @bind-value="FechaFinal"></InputDate>
+				</div>
+			</div>
+			
+
+			<div class="row mt-1">
+
 				<div class="col-3">
 					<label class="form-label"><strong>Filtrar </strong></label>
 				</div>
@@ -29,7 +45,7 @@
 
 			<div class="row">
 				<div class="col-3">
-					<InputSelect class="form-select" @bind-Value="Filtro">
+					<InputSelect class="form-select border-3 border-black" @bind-Value="Filtro">
 						<option value="" selected disabled>Elija una opcion</option>
 						<option value="Concepto">Concepto</option>
 						<option value="Total">Total</option>
@@ -38,16 +54,16 @@
 
 				<div class="col-4">
 					<div class="input-group">
-						<input class="form-control" @bind-value="ValorFiltro" placeholder="Buscar" />
-						<button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
-						<button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise" @onclick="Restablecer"></button>
+						<input class="form-control border-3 border-black" @bind-value="ValorFiltro" placeholder="Buscar" />
+						<button type="button" class="btn btn-outline-primary bi bi-search border-3 border-primary" @onclick="Buscar"></button>
+						<button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise border-3 border-secondary" @onclick="Restablecer"></button>
 
 					</div>
 
 				</div>
 				<div class="col-4">
 					<div>
-						<a href="/EntradaCreates/0" class="btn btn-success bi bi-plus-square"> Crear</a>
+						<a href="/EntradaCreates/0" class="btn btn-success bi bi-plus-square border-3 border-success"> Crear</a>
 					</div>
 				</div>
 
@@ -115,6 +131,9 @@
 	public string Filtro { get; set; } = string.Empty;
 	public string ValorFiltro { get; set; } = string.Empty;
 
+	public DateTime FechaInicio { get; set; } = DateTime.Now.AddYears(-1);
+	public DateTime FechaFinal { get; set; } = DateTime.Now;
+
 	protected override async Task OnInitializedAsync()
 	{
 		listaEntrada = await entradaService.Listar(p => true);
@@ -128,15 +147,15 @@
 		{
 			if (Filtro == "Id" && int.TryParse(ValorFiltro, out int id))
 			{
-				listaFiltrada = listaFiltrada.Where(e => e.EntradaId == id).ToList();
+				listaFiltrada = listaFiltrada.Where(e => e.EntradaId == id && e.Fecha > FechaInicio && e.Fecha < FechaFinal).ToList();
 			}
 			if (Filtro == "Concepto")
 			{
-				listaFiltrada = listaFiltrada.Where(e => e.Concepto.Contains(ValorFiltro)).ToList();
+				listaFiltrada = listaFiltrada.Where(e => e.Concepto.Contains(ValorFiltro) && e.Fecha > FechaInicio && e.Fecha < FechaFinal).ToList();
 			}
 			if (Filtro == "Total" && double.TryParse(ValorFiltro, out double total))
 			{
-				listaFiltrada = listaFiltrada.Where(e => e.Total == total).ToList();
+				listaFiltrada = listaFiltrada.Where(e => e.Total == total && e.Fecha > FechaInicio && e.Fecha < FechaFinal).ToList();
 			}
 			
 

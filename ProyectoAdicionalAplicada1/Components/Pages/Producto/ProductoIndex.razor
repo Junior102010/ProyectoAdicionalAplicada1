@@ -29,7 +29,7 @@
 
 			<div class="row">
 				<div class="col-3">
-					<InputSelect class="form-select" @bind-Value="Filtro">
+					<InputSelect class="form-select border-3 border-black" @bind-Value="Filtro">
 						<option value="" selected disabled>Elija una opcion</option>
 						<option value="Nombre">Descripcion</option>
 						<option value="Precio">Precio</option>
@@ -39,16 +39,16 @@
 
 				<div class="col-4">
 					<div class="input-group">
-							<input class="form-control" @bind-value="ValorFiltro" placeholder="Buscar" />
-							<button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
-							<button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise" @onclick="Restablecer"></button>
+						<input class="form-control border-3 border-black" @bind-value="ValorFiltro" placeholder="Buscar" />
+						<button type="button" class="btn btn-outline-primary bi bi-search border-3 border-primary" @onclick="Buscar"></button>
+						<button type="button" class="btn btn-outline-secondary bi bi-arrow-counterclockwise border-3 border-secondary" @onclick="Restablecer"></button>
 						
 					</div>
 					
 				</div>
 				<div class="col-4">
 					<div>
-						<a href="/ProductoCreates/0" class="btn btn-success bi bi-plus-square"> Crear</a>
+						<a href="/ProductoCreates/0" class="btn btn-success bi bi-plus-square border-3 border-success"> Crear</a>
 					</div>
 				</div>
 				
